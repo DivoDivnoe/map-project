@@ -1,60 +1,60 @@
-<template>
-  <div id="app">
-    <img src="./assets/logo.png">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank">Twitter</a></li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li><a href="http://router.vuejs.org/" target="_blank">vue-router</a></li>
-      <li><a href="http://vuex.vuejs.org/" target="_blank">vuex</a></li>
-      <li><a href="http://vue-loader.vuejs.org/" target="_blank">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank">awesome-vue</a></li>
-    </ul>
-  </div>
+<template lang="pug">
+  #app
+    .container-fluid
+      .row
+        .col-12.mb-4
+          app-map(
+            :points="points"
+            :newPoint="newPoint",
+            @pointAdded="pointAdded"
+          )
+        .col-6.col-lg-4.mx-auto
+          app-input(@addNewPoint="addNewPoint")
+          points-list(
+            :points="points"
+            @changePointsOrder="changePointsOrder"
+          )
 </template>
 
 <script>
-export default {
-  name: 'app',
-  data () {
-    return {
-      msg: 'Welcome to Your Vue.js App'
+  import Map from './components/Map.vue';
+  import NewPoint from './components/NewPoint.vue';
+  import PointsList from './components/PointsList.vue';
+
+  export default {
+    components: {
+      appMap: Map,
+      appInput: NewPoint,
+      pointsList: PointsList
+    },
+    data() {
+      return {
+        points: [],
+        currentPointName: '',
+        newPoint: false
+      }
+    },
+    methods: {
+      addNewPoint(name) {
+        this.currentPointName = name;
+        this.newPoint = true;
+      },
+      changePointsOrder(indexes) {
+        const movedPoint = this.points.splice(indexes.pastIndex, 1)[0];
+
+        this.points.splice(indexes.currentIndex, 0, movedPoint);
+      },
+      pointAdded(coords) {
+        this.points.push({
+          name: this.currentPointName,
+          coords: Object.assign({}, coords)
+        });
+        this.newPoint = false;
+      }
     }
-  }
-}
+  };
 </script>
 
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+<style lang="scss" scoped>
 
-h1, h2 {
-  font-weight: normal;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
-}
 </style>
