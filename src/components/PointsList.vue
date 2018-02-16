@@ -9,6 +9,7 @@
       @dragstart.native="dragstartHandler"
       @dragover.native.prevent="dragoverHandler"
       @dragenter.native="dragenterHandler"
+      @deleteItem="deleteItem($event)"
     ) {{point.name}}
 </template>
 
@@ -54,6 +55,9 @@
 
         this.draggedItem = null;
         this.dropOverItem = null;
+      },
+      deleteItem(name) {
+        this.$emit('deleteItem', name);
       }
     }
   };

@@ -5,14 +5,16 @@
         .col-12.mb-4
           app-map(
             :points="points"
-            :newPoint="newPoint",
+            :newPoint="newPoint"
             @pointAdded="pointAdded"
+            @changePointCoords="changePointCoords"
           )
         .col-6.col-lg-4.mx-auto
           app-input(@addNewPoint="addNewPoint")
           points-list(
             :points="points"
             @changePointsOrder="changePointsOrder"
+            @deleteItem="deleteItem"
           )
 </template>
 
@@ -50,6 +52,16 @@
           coords: Object.assign({}, coords)
         });
         this.newPoint = false;
+      },
+      changePointCoords(coords) {
+        const point = this.points.find((item) => item.coords.x === coords.initialCoords.x && item.coords.y === coords.initialCoords.y);
+
+        point.coords = Object.assign({}, Object.assign({}, coords.currentCoords));
+      },
+      deleteItem(name) {
+        const index = this.points.findIndex((point) => point.name === name);
+
+        this.points.splice(index, 1);
       }
     }
   };
