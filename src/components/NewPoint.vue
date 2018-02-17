@@ -7,19 +7,25 @@
       placeholder="Новая точка маршрута"
       aria-label="Username"
       aria-describedby="basic-addon1"
+      v-model="pointName"
       @keydown.enter="addNewPoint"
     )
 </template>
 
 <script>
   export default {
+    data() {
+      return {
+        pointName: ''
+      }
+    },
     methods: {
       addNewPoint(evt) {
-        const target = evt.target;
+        if (!this.pointName.length) return false;
 
-        this.$emit('addNewPoint', target.value);
+        this.$emit('addNewPoint', this.pointName);
 
-        target.value = '';
+        this.pointName = '';
       }
     }
   };
