@@ -1,98 +1,94 @@
-<template lang="pug">
-  #map
+<template>
+  <yandex-map
+    :coords="initialCoords"
+    zoom="10"
+    style="width: 100%; height: 500px;"
+    @map-was-initialized="initHandler"
+  >
+    <ymap-marker
+      v-for="(point, index) in points"
+      :key="index"
+      :markerId="index"
+      marker-type="placemark"
+      :coords="[point.coords.x, point.coords.y]"
+      :balloonTemplate="`<strong>${point.name}</strong>`"
+      :properties="placemarkProps"
+      :options="placemarkOptions"
+      :callbacks="handlers"
+    ></ymap-marker>
+    <ymap-marker
+      v-if="polylineCoords.length"
+      marker-type="polyline"
+      markerId="track"
+      :coords="polylineCoords"
+    ></ymap-marker>
+  </yandex-map>
 </template>
 
 <script>
-  const INITIAL_COORDS = {
-    x: 55.76,
-    y: 37.64
-  };
+  import {yandexMap, ymapMarker} from 'vue-yandex-maps';
 
   export default {
+    components: {yandexMap, ymapMarker},
     props: ['newPoint', 'points'],
 
     data() {
       return {
+        initialCoords: [55.76, 37.64],
         myMap: null,
-        myPolyline: null
-      }
-    },
-    created() {
-      new Promise((resolve) => {
-        ymaps.ready(resolve)
-          .then(() => this.init())
-          .then(() => this.setPoints())
-          .then(() => this.createTrack());
-      });
-    },
-    methods: {
-      init() {
-        this.myMap = new ymaps.Map('map', {
-          center: [INITIAL_COORDS.x, INITIAL_COORDS.y],
-          zoom: 10
-        }, {
-          searchControlProvider: 'yandex#search'
-        });
-      },
-      setPoint(point) {
-        const placeMark = new ymaps.Placemark([point.coords.x, point.coords.y], {
-          balloonContent: `<strong>${point.name}</strong>`,
+        draggedItem: null,
+        draggedItemCoords: null,
+        placemarkProps: {
           balloonOptions: {
-              maxWidth: 70,
-              hasCloseButton: false,
-              mapAutoPan: 0
+            maxWidth: 70,
+            hasCloseButton: false,
+            mapAutoPan: 0
           }
-        }, {
+        },
+        placemarkOptions: {
           draggable: true,
           preset: 'islands#circleIcon',
           iconColor: '#0095b6'
-        });
-
-        let initialCoords;
-
-        placeMark.events.add('dragstart', (evt) => {
-          initialCoords = placeMark.geometry.getCoordinates();
-          initialCoords = {
-            x: initialCoords[0],
-            y: initialCoords[1]
-          };
-        });
-
-        placeMark.events.add('drag', (evt) => {
-          let currentCoords = placeMark.geometry.getCoordinates();
-          currentCoords = {
-            x: currentCoords[0],
-            y: currentCoords[1]
-          };
-          this.myMap.geoObjects.remove(this.myPolyline);
-          this.createTrack();
-
-          this.$emit('changePointCoords', {initialCoords, currentCoords});
-
-          initialCoords = Object.assign({}, currentCoords);
-        });
-
-        placeMark.events.add('dragend', (evt) => {
-          let currentCoords = evt.get('target').geometry.getCoordinates();
-          currentCoords = {
-            x: currentCoords[0],
-            y: currentCoords[1]
-          };
-
-          this.$emit('changePointCoords', {initialCoords, currentCoords});
-        });
-
-        this.myMap.geoObjects.add(placeMark);
+        },
+        handlers: {
+          dragstart: this.dragstartHandler.bind(this),
+          drag: this.dragHandler.bind(this)
+        }
+      }
+    },
+    methods: {
+      initHandler(map) {
+        if (!this.myMap) {
+          this.myMap = map;
+          console.log('init');
+        }
       },
-      setPoints() {
-        this.points.forEach(this.setPoint);
+      dragstartHandler(evt) {
+        this.draggedItem = evt.originalEvent.target;
+
+        const draggedItemCoords = this.draggedItem.geometry.getCoordinates();
+
+        this.draggedItemCoords = {
+          x: draggedItemCoords[0],
+          y: draggedItemCoords[1]
+        };
       },
-      createTrack() {
-        this.myPolyline = new ymaps.Polyline(this.polylineCoords, {}, {
-          strokeColor: "#00000088",
-          strokeWidth: 4
+      dragHandler() {
+        let currentCoords = this.draggedItem.geometry.getCoordinates();
+
+        currentCoords = {
+          x: currentCoords[0],
+          y: currentCoords[1]
+        };
+
+        this.$emit('changePointCoords', {
+          initialCoords: this.draggedItemCoords,
+          currentCoords
         });
-        this.myMap.geoObjects.add(this.myPolyline);
+
+        console.log(currentCoords);
+
+        this.draggedItemCoords = Object.assign({}, currentCoords);
       }
     },
     computed: {
@@ -106,6 +102,9 @@
         return this.points.map((point) => {
           return [point.coords.x, point.coords.y];
         });
+      },
+      initialPoints() {
+        return Object.assign({}, this.points);
       }
     },
     watch: {
@@ -113,11 +112,6 @@
         if (this.newPoint) {
           this.$emit('pointAdded', this.centerCoords);
         }
-      },
-      points() {
-        this.myMap.geoObjects.removeAll();
-        this.setPoints();
-        this.createTrack();
       }
     }
   };

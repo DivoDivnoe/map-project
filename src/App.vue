@@ -31,7 +31,13 @@
     },
     data() {
       return {
-        points: [],
+        points: [{
+          name: 'point1',
+          coords: {
+            x: 55.76,
+            y: 37.64
+          }
+        }],
         currentPointName: '',
         newPoint: false
       }
