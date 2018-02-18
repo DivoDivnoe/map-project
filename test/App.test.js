@@ -17,8 +17,8 @@ describe('NewPoint.vue', () => {
 
     input.value = inputValue;
 
-    const clickEvent = new window.Event('keydown');
-    input.dispatchEvent(clickEvent);
+    const enterEvent = new window.KeyboardEvent('keydown', {keyCode: 13});
+    input.dispatchEvent(enterEvent);
     NewPointComponent._watcher.run();
 
     expect(AppComponent.points.length).toEqual(pointsLength + 1);
