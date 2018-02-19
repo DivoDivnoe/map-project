@@ -6,17 +6,20 @@
     points-list-item(
       v-for="point in points"
       :key="point.name"
+      :class="{'list-group-item--active': hoverItem === point.name}"
       @dragstart.native="dragstartHandler"
       @dragover.native.prevent="dragoverHandler"
       @dragenter.native="dragenterHandler"
       @deleteItem="deleteItem($event)"
+      @listHoverStart="listHoverStart"
+      @listHoverEnd="listHoverEnd"
     ) {{point.name}}
 </template>
 
 <script>
   import PointsListItem from './PointsListItem.vue';
   export default {
-    props: ['points'],
+    props: ['points', 'hoverItem'],
     components: {
       pointsListItem: PointsListItem
     },
@@ -58,6 +61,12 @@
       },
       deleteItem(name) {
         this.$emit('deleteItem', name);
+      },
+      listHoverStart(name) {
+        this.$emit('listHoverStart', name);
+      },
+      listHoverEnd() {
+        this.$emit('listHoverEnd');
       }
     }
   };

@@ -9,7 +9,7 @@
   };
 
   export default {
-    props: ['newPoint', 'points'],
+    props: ['newPoint', 'points', 'listHoverItem'],
 
     data() {
       return {
@@ -50,38 +50,44 @@
 
         let initialCoords;
 
-        placeMark.events.add('dragstart', (evt) => {
-          initialCoords = placeMark.geometry.getCoordinates();
-          initialCoords = {
-            x: initialCoords[0],
-            y: initialCoords[1]
-          };
-        });
+        placeMark.events
+          .add('dragstart', (evt) => {
+            initialCoords = placeMark.geometry.getCoordinates();
+            initialCoords = {
+              x: initialCoords[0],
+              y: initialCoords[1]
+            };
+          })
+          .add('drag', (evt) => {
+            let currentCoords = placeMark.geometry.getCoordinates();
+            currentCoords = {
+              x: currentCoords[0],
+              y: currentCoords[1]
+            };
+            this.myMap.geoObjects.remove(this.myPolyline);
+            this.createTrack();
 
-        placeMark.events.add('drag', (evt) => {
-          let currentCoords = placeMark.geometry.getCoordinates();
-          currentCoords = {
-            x: currentCoords[0],
-            y: currentCoords[1]
-          };
-          this.myMap.geoObjects.remove(this.myPolyline);
-          this.createTrack();
+            this.$emit('changePointCoords', {initialCoords, currentCoords});
 
-          this.$emit('changePointCoords', {initialCoords, currentCoords});
+            initialCoords = Object.assign({}, currentCoords);
+          })
+          .add('dragend', (evt) => {
+            let currentCoords = evt.get('target').geometry.getCoordinates();
+            currentCoords = {
+              x: currentCoords[0],
+              y: currentCoords[1]
+            };
 
-          initialCoords = Object.assign({}, currentCoords);
-        });
-
-        placeMark.events.add('dragend', (evt) => {
-          let currentCoords = evt.get('target').geometry.getCoordinates();
-          currentCoords = {
-            x: currentCoords[0],
-            y: currentCoords[1]
-          };
-
-          this.$emit('changePointCoords', {initialCoords, currentCoords});
-        });
-
+            this.$emit('changePointCoords', {initialCoords, currentCoords});
+          })
+          .add('mouseenter', (evt) =>{
+            evt.get('target').options.set('iconColor', '#0052ff');
+            this.$emit('hoverStart', point.name);
+          })
+          .add('mouseleave', (evt) => {
+            evt.get('target').options.set('iconColor', '#0095b6');
+            this.$emit('hoverEnd');
+          })
         this.myMap.geoObjects.add(placeMark);
       },
       setPoints() {
@@ -118,6 +124,9 @@
         this.myMap.geoObjects.removeAll();
         this.setPoints();
         this.createTrack();
+      },
+      listHoverItem() {
+        console.log(this.listHoverItem);
       }
     }
   };
@@ -126,6 +135,6 @@
 <style lang="scss" scoped>
   #map {
     width: 100%;
-    height: 500px;
+    min-height: 50%;
   }
 </style>
