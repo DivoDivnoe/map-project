@@ -1,6 +1,9 @@
 <template lang="pug">
   #app
     .container-fluid
+      div.text-center.mb-4
+        h1.display-4 Тестовое задание
+        p.lead Выполнил: Андрей Иванов
       app-map.mb-4(
         :points="points"
         :newPoint="newPoint"

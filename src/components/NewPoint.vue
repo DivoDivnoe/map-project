@@ -4,7 +4,7 @@
     input.form-control(
       type="text"
       id="newPoint"
-      placeholder="Новая точка маршрута"
+      placeholder="Введите название точки и нажмите enter"
       aria-label="Username"
       aria-describedby="basic-addon1"
       v-model="pointName"
