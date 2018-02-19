@@ -3,18 +3,19 @@
 </template>
 
 <script>
-  const INITIAL_COORDS = {
-    x: 55.76,
-    y: 37.64
-  };
-
   export default {
-    props: ['newPoint', 'points', 'listHoverItem'],
+    props: ['newPoint', 'points', 'listHoverItemIndex'],
 
     data() {
       return {
         myMap: null,
-        myPolyline: null
+        myPolyline: null,
+        initialCoords: {
+          x: 55.76,
+          y: 37.64
+        },
+        initialIconColor: '#0095b6',
+        hoverIconColor: '#0052ff'
       }
     },
     created() {
@@ -28,7 +29,7 @@
     methods: {
       init() {
         this.myMap = new ymaps.Map('map', {
-          center: [INITIAL_COORDS.x, INITIAL_COORDS.y],
+          center: [this.initialCoords.x, this.initialCoords.y],
           zoom: 10
         }, {
           searchControlProvider: 'yandex#search'
@@ -45,7 +46,7 @@
         }, {
           draggable: true,
           preset: 'islands#circleIcon',
-          iconColor: '#0095b6'
+          iconColor: this.initialIconColor
         });
 
         let initialCoords;
@@ -81,11 +82,11 @@
             this.$emit('changePointCoords', {initialCoords, currentCoords});
           })
           .add('mouseenter', (evt) =>{
-            evt.get('target').options.set('iconColor', '#0052ff');
+            evt.get('target').options.set('iconColor', this.hoverIconColor);
             this.$emit('hoverStart', point.name);
           })
           .add('mouseleave', (evt) => {
-            evt.get('target').options.set('iconColor', '#0095b6');
+            evt.get('target').options.set('iconColor', this.initialIconColor);
             this.$emit('hoverEnd');
           })
         this.myMap.geoObjects.add(placeMark);
@@ -125,8 +126,18 @@
         this.setPoints();
         this.createTrack();
       },
-      listHoverItem() {
-        console.log(this.listHoverItem);
+      listHoverItemIndex() {
+        if (this.listHoverItemIndex !== null) {
+          if (this.hoveredItem) {
+            this.hoveredItem.options.set('iconColor', this.initialIconColor);
+          }
+
+          this.hoveredItem = this.myMap.geoObjects.get(this.listHoverItemIndex);
+          this.hoveredItem.options.set('iconColor', this.hoverIconColor);
+        } else {
+          this.hoveredItem.options.set('iconColor', this.initialIconColor);
+          this.hoveredItem = null;
+        }
       }
     }
   };

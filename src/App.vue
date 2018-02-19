@@ -4,7 +4,7 @@
       app-map.mb-4(
         :points="points"
         :newPoint="newPoint"
-        :listHoverItem="listHoverItem"
+        :listHoverItemIndex="listHoverItemIndex"
         @pointAdded="pointAdded"
         @changePointCoords="changePointCoords"
         @hoverStart="hoverStart"
@@ -40,7 +40,7 @@
         currentPointName: '',
         newPoint: false,
         hoverItem: null,
-        listHoverItem: null
+        listHoverItemIndex: null
       }
     },
     methods: {
@@ -77,10 +77,10 @@
         this.hoverItem = null;
       },
       listHoverStart(name) {
-        this.listHoverItem = name;
+        this.listHoverItemIndex = this.points.findIndex(point => point.name === name);
       },
       listHoverEnd() {
-        this.listHoverItem = null;
+        this.listHoverItemIndex = null;
       }
     }
   };

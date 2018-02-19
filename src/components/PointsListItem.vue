@@ -40,6 +40,7 @@
   .list-group-item {
     position: relative;
     cursor: pointer;
+    transition: background-color 0.2s;
 
     &--active {
       background-color: #dddddd;
