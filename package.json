@@ -13,11 +13,7 @@
   "dependencies": {
     "vue": "^2.5.11"
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
-  ],
+  "browserslist": ["> 1%", "last 2 versions", "not ie <= 8"],
   "devDependencies": {
     "@vue/test-utils": "^1.0.0-beta.11",
     "babel-core": "^6.26.0",
@@ -44,10 +40,7 @@
     "moduleNameMapper": {
       "^vue$": "vue/dist/vue.common.js"
     },
-    "moduleFileExtensions": [
-      "js",
-      "vue"
-    ],
+    "moduleFileExtensions": ["js", "vue"],
     "transform": {
       "^.+\\.js$": "<rootDir>/node_modules/babel-jest",
       ".*\\.(vue)$": "<rootDir>/node_modules/jest-vue-preprocessor"
