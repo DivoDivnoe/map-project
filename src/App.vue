@@ -1,20 +1,25 @@
 <template lang="pug">
   #app
     .container-fluid
+      app-map.mb-4(
+        :points="points"
+        :newPoint="newPoint"
+        :listHoverItemIndex="listHoverItemIndex"
+        @pointAdded="pointAdded"
+        @changePointCoords="changePointCoords"
+        @hoverStart="hoverStart"
+        @hoverEnd="hoverEnd"
+      )
       .row
-        .col-12.mb-4
-          app-map(
-            :points="points"
-            :newPoint="newPoint"
-            @pointAdded="pointAdded"
-            @changePointCoords="changePointCoords"
-          )
-        .col-6.col-lg-4.mx-auto
+        .col-8.col-sm-6.col-lg-4.mx-auto
           app-input(@addNewPoint="addNewPoint")
           points-list(
             :points="points"
+            :hoverItem="hoverItem"
             @changePointsOrder="changePointsOrder"
             @deleteItem="deleteItem"
+            @listHoverStart="listHoverStart"
+            @listHoverEnd="listHoverEnd"
           )
 </template>
 
@@ -33,7 +38,9 @@
       return {
         points: [],
         currentPointName: '',
-        newPoint: false
+        newPoint: false,
+        hoverItem: null,
+        listHoverItemIndex: null
       }
     },
     methods: {
@@ -62,11 +69,28 @@
         const index = this.points.findIndex((point) => point.name === name);
 
         this.points.splice(index, 1);
+      },
+      hoverStart(name) {
+        this.hoverItem = name;
+      },
+      hoverEnd() {
+        this.hoverItem = null;
+      },
+      listHoverStart(name) {
+        this.listHoverItemIndex = this.points.findIndex(point => point.name === name);
+      },
+      listHoverEnd() {
+        this.listHoverItemIndex = null;
       }
     }
   };
 </script>
 
 <style lang="scss" scoped>
-
+  #app {
+    height: 100%;
+  }
+  .container-fluid {
+    height: 100%;
+  }
 </style>

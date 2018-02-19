@@ -3,18 +3,19 @@
 </template>
 
 <script>
-  const INITIAL_COORDS = {
-    x: 55.76,
-    y: 37.64
-  };
-
   export default {
-    props: ['newPoint', 'points'],
+    props: ['newPoint', 'points', 'listHoverItemIndex'],
 
     data() {
       return {
         myMap: null,
-        myPolyline: null
+        myPolyline: null,
+        initialCoords: {
+          x: 55.76,
+          y: 37.64
+        },
+        initialIconColor: '#0095b6',
+        hoverIconColor: '#0052ff'
       }
     },
     created() {
@@ -28,7 +29,7 @@
     methods: {
       init() {
         this.myMap = new ymaps.Map('map', {
-          center: [INITIAL_COORDS.x, INITIAL_COORDS.y],
+          center: [this.initialCoords.x, this.initialCoords.y],
           zoom: 10
         }, {
           searchControlProvider: 'yandex#search'
@@ -45,43 +46,49 @@
         }, {
           draggable: true,
           preset: 'islands#circleIcon',
-          iconColor: '#0095b6'
+          iconColor: this.initialIconColor
         });
 
         let initialCoords;
 
-        placeMark.events.add('dragstart', (evt) => {
-          initialCoords = placeMark.geometry.getCoordinates();
-          initialCoords = {
-            x: initialCoords[0],
-            y: initialCoords[1]
-          };
-        });
+        placeMark.events
+          .add('dragstart', (evt) => {
+            initialCoords = placeMark.geometry.getCoordinates();
+            initialCoords = {
+              x: initialCoords[0],
+              y: initialCoords[1]
+            };
+          })
+          .add('drag', (evt) => {
+            let currentCoords = placeMark.geometry.getCoordinates();
+            currentCoords = {
+              x: currentCoords[0],
+              y: currentCoords[1]
+            };
+            this.myMap.geoObjects.remove(this.myPolyline);
+            this.createTrack();
 
-        placeMark.events.add('drag', (evt) => {
-          let currentCoords = placeMark.geometry.getCoordinates();
-          currentCoords = {
-            x: currentCoords[0],
-            y: currentCoords[1]
-          };
-          this.myMap.geoObjects.remove(this.myPolyline);
-          this.createTrack();
+            this.$emit('changePointCoords', {initialCoords, currentCoords});
 
-          this.$emit('changePointCoords', {initialCoords, currentCoords});
+            initialCoords = Object.assign({}, currentCoords);
+          })
+          .add('dragend', (evt) => {
+            let currentCoords = evt.get('target').geometry.getCoordinates();
+            currentCoords = {
+              x: currentCoords[0],
+              y: currentCoords[1]
+            };
 
-          initialCoords = Object.assign({}, currentCoords);
-        });
-
-        placeMark.events.add('dragend', (evt) => {
-          let currentCoords = evt.get('target').geometry.getCoordinates();
-          currentCoords = {
-            x: currentCoords[0],
-            y: currentCoords[1]
-          };
-
-          this.$emit('changePointCoords', {initialCoords, currentCoords});
-        });
-
+            this.$emit('changePointCoords', {initialCoords, currentCoords});
+          })
+          .add('mouseenter', (evt) =>{
+            evt.get('target').options.set('iconColor', this.hoverIconColor);
+            this.$emit('hoverStart', point.name);
+          })
+          .add('mouseleave', (evt) => {
+            evt.get('target').options.set('iconColor', this.initialIconColor);
+            this.$emit('hoverEnd');
+          })
         this.myMap.geoObjects.add(placeMark);
       },
       setPoints() {
@@ -118,6 +125,19 @@
         this.myMap.geoObjects.removeAll();
         this.setPoints();
         this.createTrack();
+      },
+      listHoverItemIndex() {
+        if (this.listHoverItemIndex !== null) {
+          if (this.hoveredItem) {
+            this.hoveredItem.options.set('iconColor', this.initialIconColor);
+          }
+
+          this.hoveredItem = this.myMap.geoObjects.get(this.listHoverItemIndex);
+          this.hoveredItem.options.set('iconColor', this.hoverIconColor);
+        } else {
+          this.hoveredItem.options.set('iconColor', this.initialIconColor);
+          this.hoveredItem = null;
+        }
       }
     }
   };
@@ -126,6 +146,6 @@
 <style lang="scss" scoped>
   #map {
     width: 100%;
-    height: 500px;
+    min-height: 50%;
   }
 </style>
