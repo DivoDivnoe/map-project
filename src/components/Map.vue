@@ -1,5 +1,5 @@
 <template lang="pug">
-  #map
+  #map.mb-4
 </template>
 
 <script>
@@ -21,9 +21,11 @@
     created() {
       new Promise((resolve) => {
         ymaps.ready(resolve)
-          .then(() => this.init())
-          .then(() => this.setPoints())
-          .then(() => this.createTrack());
+          .then(() => {
+            this.init();
+            this.setPoints();
+            this.createTrack();
+          });
       });
     },
     methods: {
